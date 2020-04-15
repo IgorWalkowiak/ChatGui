@@ -165,8 +165,33 @@ class UserBrowser():
 
     def addAvailableUser(self, name):
         if name not in self.availableUsers:
+            print("DODAJE "+name)
             self.availableUsers.append(name)
             self.listbox.insert("end", name)
+            for index in range(self.listbox.size()):
+                print(self.listbox.get(index))
+
+    def removeAvailableUser(self, name):
+        for index in range(self.listbox.size()):
+            if name == self.listbox.get(index):
+                print("USUWAM" + name)
+                self.listbox.delete(index)
+                self.availableUsers.remove(name)
+
+    def updateAvailableUsers(self, names):
+        print("Update users: ", names, "aktualnie mam: ", self.availableUsers)
+        freshUsers = set(names)
+        oldUsers = set(self.availableUsers)
+        newUsers = freshUsers - oldUsers
+        absentUsers = oldUsers - freshUsers
+
+        print("Do dodania :",newUsers)
+        print("Do usuniecia :",absentUsers)
+        for newUser in newUsers:
+            self.addAvailableUser(newUser)
+
+        for absentUser in absentUsers:
+            self.removeAvailableUser(absentUser)
 
     def handleDoubleClick(self, event):
         selectedBox = self.listbox.get("active")
@@ -176,16 +201,15 @@ class UserBrowser():
         self.doubleClickHandler(selectedBox, autoActiv=True)
 
 class ChatGUI:
-    def __init__(self, width, height, localUser, userOutputHandler):
-        self.notebook = ChatNotebook(userOutputHandler, localUser, width=width, height=height)
+    def __init__(self, width, height, localUserNickname, userOutputHandler):
+        self.notebook = ChatNotebook(userOutputHandler, localUserNickname, width=width, height=height)
         self.notebook.pack(side="right", fill="both", expand=1)
 
         self.userBrowse = UserBrowser()
         self.userBrowse.doubleTabClickHandlerSubscribe(self.notebook.addTab)
 
     def updateAvailableUsers(self, users):
-        for user in users:
-            self.userBrowse.addAvailableUser(user)
+        self.userBrowse.updateAvailableUsers(users)
 
     def newMessageFrom(self, message, user):
         self.userBrowse.addAvailableUser(user)
